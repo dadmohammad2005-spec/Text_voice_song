@@ -1,0 +1,593 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text to Song Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #94c976 0%, #62b8b3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(220, 206, 217, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.3);
+            padding: 45px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+            border: 3px solid #0a0a0a;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #060606;
+            font-size: 3.2rem;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 0px rgba(78, 205, 196, 0.2);
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+        
+        .music-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .subtitle {
+            color: #363131;
+            font-size: 1.3rem;
+            margin-bottom: 35px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #2e2929, #3cada6);
+            
+            -webkit-text-fill-color: transparent;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .lyrics-container {
+            margin: 30px 0;
+        }
+        
+        .song-title {
+            color: #090909;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 250px;
+            padding: 25px;
+            border: 3px solid #060606;
+            font-weight: bold;
+            border-radius: 20px;
+            font-size: 1.3rem;
+            font-family: 'Courier New', monospace;
+            resize: none;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            color: #222;
+            font-weight: 600;
+            line-height: 1.6;
+            text-align: left;
+            box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #0a0a0a;
+            box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.2);
+            background-color: rgb(203, 229, 195);
+            transform: scale(1.01);
+        }
+        
+        .lyrics-examples {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .lyric-btn {
+            padding: 12px 25px;
+            background: linear-gradient(45deg, #b19999, #c5e776);
+            color: rgb(18, 18, 18);
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            margin: 5px;
+        }
+        
+        .lyric-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .generate-btn {
+            padding: 20px 50px;
+            background: linear-gradient(45deg, #0f1010, #273432);
+            color: rgb(248, 243, 243);
+            border: none;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(78, 205, 196, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-left: auto;
+            margin-right: auto;
+            min-width: 300px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 30px rgba(78, 205, 196, 0.5);
+            background: linear-gradient(45deg, #44a08d, #3a8a7a);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(2px);
+        }
+        
+        #loading {
+            display: none;
+            margin: 25px 0;
+            color: #4ecdc4;
+            font-size: 1.3rem;
+            font-weight: bold;
+            background: rgba(78, 205, 196, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            border-left: 5px solid #4ecdc4;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border: 4px solid #161616;
+            border-top: 4px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #result {
+            margin-top: 35px;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: none;
+            animation: slideIn 0.6s ease-out;
+            color: rgb(13, 13, 13);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #result h3 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+            color: rgb(9, 9, 9);
+            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+        }
+        
+        audio {
+            width: 100%;
+            margin: 25px 0;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            background: #333;
+            padding: 10px;
+        }
+        
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 35px;
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: rgb(13, 13, 13);
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 900;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+            font-size: 1.2rem;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(255, 107, 107, 0.5);
+            background: linear-gradient(45deg, #6ea77b, #966464);
+        }
+        
+        .song-list {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 25px;
+            text-align: left;
+        }
+        
+        .song-list h4 {
+            color: rgb(18, 18, 18);
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .song-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px 20px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .song-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateX(10px);
+        }
+        
+        .note {
+            color: #090909;
+            font-style: italic;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 15px;
+            background: rgba(9, 9, 9, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #2e2525;
+        }
+        
+        .lyrics-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #030303;
+            font-weight: 500;
+            padding: 10px;
+            background: rgba(239, 246, 245, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="music-icon">🎵 🎶 🎤</div>
+        <h1>LYRICS TO AUDIO CONVERTER</h1>
+        <p class="subtitle">Transform your favorite song lyrics into audio instantly!</p>
+        
+        <div class="song-title">🎤 Enter Your Song Lyrics:</div>
+        
+        <textarea id="textInput" placeholder="Paste your song lyrics here...
+For example:
+Tum hi ho, tum hi ho
+Mere dil ka armaan
+Tum hi ho, tum hi ho
+Meri zindagi ka saazish...">
+kasam sa maja tum sa pjar owa a
+Tere bina lagta nahi hai jee
+Dil mera dhadakta hai</textarea>
+        
+        <div class="lyrics-stats">
+            <span>📝 Characters: <span id="charCount">0</span></span>
+            <span>📖 Lines: <span id="lineCount">0</span></span>
+            <span>⏱️ Est. Duration: <span id="duration">0s</span></span>
+        </div>
+        
+        <div class="lyrics-examples">
+            <button class="lyric-btn" onclick="loadLyrics('romantic')">💖 Romantic Song</button>
+            <button class="lyric-btn" onclick="loadLyrics('sad')">😢 Sad Song</button>
+            <button class="lyric-btn" onclick="loadLyrics('party')">🎉 Party Song</button>
+            <button class="lyric-btn" onclick="loadLyrics('bollywood')">🎬 Bollywood</button>
+            <button class="lyric-btn" onclick="loadLyrics('punjabi')">💃 Balochi</button>
+        </div>
+        
+        <button class="generate-btn" onclick="generateAudio()">
+            🎵 CONVERT TO AUDIO 🎵
+        </button>
+        
+        <div id="loading">
+            <span class="loading-spinner"></span> Creating your song audio... Please wait
+        </div>
+        
+        <div class="song-list">
+            <h4>🎧 Quick Lyrics Examples:</h4>
+            <div class="song-item" onclick="loadExample(1)">1. Romantic Love Song Lyrics</div>
+            <div class="song-item" onclick="loadExample(2)">2. Heartbreak Sad Song Lyrics</div>
+            <div class="song-item" onclick="loadExample(3)">3. Bollywood Party Song</div>
+            <div class="song-item" onclick="loadExample(4)">4. Balochi Dance Track</div>
+        </div>
+        
+        <div id="result">
+            <!-- Audio result yahan aayega -->
+        </div>
+        
+        <div class="note">
+            💡 Tip: You can write lyrics in any language. For best results, write in English or Roman Urdu/Hindi.
+            Press Ctrl+Enter to quickly generate audio!
+        </div>
+    </div>
+
+    <script>
+        // Initialize character counter
+        const textInput = document.getElementById('textInput');
+        const charCount = document.getElementById('charCount');
+        const lineCount = document.getElementById('lineCount');
+        const duration = document.getElementById('duration');
+        
+        function updateStats() {
+            const text = textInput.value;
+            charCount.textContent = text.length;
+            lineCount.textContent = text.split('\n').length;
+            duration.textContent = Math.ceil(text.length / 15) + 's';
+        }
+        
+        textInput.addEventListener('input', updateStats);
+        updateStats(); // Initial update
+        
+        // Lyrics examples
+        const lyricsExamples = {
+            romantic: `Tum hi ho, tum hi ho
+Mere dil ka armaan
+Tum hi ho, tum hi ho
+Meri zindagi ka saazish
+
+Teri aankhon mein base hai sapne mere
+Teri baaton mein chhupi hai duaaen meri
+Tujhse hi shuru, tujhpe hi khatam
+Meri kahani hai tu
+`,
+
+            sad: `Kabhi khushi kabhi gham
+Zindagi hai yeh naam
+Aansuon ki lakeeron mein
+Chhupi hai dard ki kahaani
+`,
+
+            party: `Let's party all night
+Under the shining lights
+DJ play that beat
+Move your dancing feet
+
+
+Bass is dropping low
+Everybody go
+Dance like nobody's watching
+Love like there's no tomorrow`,
+
+            bollywood: `Gallan Goodiyan
+Nachde ne saare
+Dil da mamu
+Aaja ve mahi
+
+
+Party all night
+Dil dhadak dhadak
+Jab tak hai jaan
+Chammak challo`,
+
+            Balochi: `Laung da lashkara
+Mile ho tum
+Ni mainu pata
+
+
+High rated gabru
+Lamberghini
+Phir milange
+
+Dil diyan gallan
+Surma surma
+Nach Punjaban`
+        };
+        
+        const songExamples = [
+            `Tum Hi Ho - Aashiqui 2
+Tum hi ho, tum hi ho
+Mere dil ka armaan
+Tum hi ho, tum hi ho
+Meri zindagi ka saazish
+
+Meri kahani hai tu`,
+
+            `Channa Mereya - Ae Dil Hai Mushkil
+Channa mereya
+Channa mereya
+
+Mujhse hai zyada tujhpe hai jaan meri`,
+
+            `Badtameez Dil - Yeh Jawaani Hai Deewani
+Tujhko kya ho gaya
+
+I just wanna move on
+Saturday Saturday`,
+
+            `Laung Da Lashkara - Jatt & Juliet 3
+Laung da lashkara
+Mile ho tum
+Oh gal mardi aa`
+        ];
+        
+        function loadLyrics(type) {
+            textInput.value = lyricsExamples[type];
+            updateStats();
+            textInput.focus();
+        }
+        
+        function loadExample(num) {
+            textInput.value = songExamples[num - 1];
+            updateStats();
+            textInput.focus();
+        }
+        
+        function generateAudio() {
+            var text = textInput.value.trim();
+            var loading = document.getElementById('loading');
+            var resultDiv = document.getElementById('result');
+            
+            if (!text) {
+                alert('Please enter some lyrics to convert to audio!');
+                textInput.focus();
+                return;
+            }
+            
+            if (text.length < 10) {
+                alert('Please enter at least 10 characters for better audio!');
+                return;
+            }
+            
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+            
+            // Show processing animation
+            setTimeout(() => {
+                loading.innerHTML = '<span class="loading-spinner"></span> Almost done! Finalizing your song...';
+            }, 2000);
+            
+            // AJAX request
+            fetch(`/generate-audio/?text=${encodeURIComponent(text)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Server error: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    loading.style.display = 'none';
+                    
+                    if (data.status === 'success') {
+                        // Audio player show karein with enhanced UI
+                        resultDiv.innerHTML = `
+                            <h3>🎉 YOUR SONG IS READY! 🎉</h3>
+                            <p style="margin-bottom: 20px; font-size: 1.1rem;">Listen to your created audio:</p>
+                            
+                            <audio controls autoplay>
+                                <source src="${data.audio_url}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                            
+                            <div style="margin-top: 30px;">
+                                <a href="${data.audio_url}" class="download-btn" download="my-song-lyrics.mp3">
+                                    📥 DOWNLOAD SONG AUDIO
+                                </a>
+                            </div>
+                            
+                            <div style="margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px;">
+                                <p style="color: #4ecdc4; font-weight: bold;">✅ Audio successfully created!</p>
+                                <p style="font-size: 0.9rem; margin-top: 5px;">You can now share or save this audio file.</p>
+                            </div>
+                        `;
+                        resultDiv.style.display = 'block';
+                        
+                        // Smooth scroll to result
+                        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        resultDiv.innerHTML = `
+                            <h3 style="color: #ff6b6b;">❌ CREATION FAILED</h3>
+                            <p style="text-align: center;">${data.message || 'Unable to create audio. Please try again.'}</p>
+                        `;
+                        resultDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    loading.style.display = 'none';
+                    resultDiv.innerHTML = `
+                        <h3 style="color: #ff6b6b;">❌ CONNECTION ERROR</h3>
+                        <p style="text-align: center;">Unable to connect to server. Please check your internet connection.</p>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; text-align: center; margin-top: 10px;">Error: ${error.message}</p>
+                    `;
+                    resultDiv.style.display = 'block';
+                });
+        }
+        
+        // Ctrl+Enter for quick generation
+        textInput.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateAudio();
+            }
+        });
+        
+        // Auto-focus on textarea
+        window.onload = function() {
+            textInput.focus();
+            textInput.select();
+        }
+        
+        // Add some sample lyrics on page load
+        setTimeout(() => {
+            if (textInput.value.length < 50) {
+                loadLyrics('romantic');
+            }
+        }, 500);
+    </script>
+</body>
+</html>
